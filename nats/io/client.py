@@ -23,6 +23,7 @@ import json
 import time
 import io
 import ssl
+import logging
 
 from random import shuffle
 from urlparse import urlparse
@@ -201,6 +202,7 @@ class Client(object):
             'reconnects': 0,
             'errors_received': 0
         }
+        self._logger = logging.getLogger(__name__)
 
     @tornado.gen.coroutine
     def connect(self,
@@ -1130,6 +1132,7 @@ class Client(object):
                 yield self.close()
                 break
             except Exception as e:
+                self._logger.exception('problem reconnecting')
                 self._err = e
                 if self._error_cb is not None:
                     self._error_cb(e)
@@ -1206,6 +1209,7 @@ class Client(object):
                 self._current_server = s
                 break
             except Exception as e:
+                self._logger.exception('problem selecting next server')
                 s.last_attempt = time.time()
                 s.reconnects += 1
 
@@ -1406,6 +1410,7 @@ class Client(object):
             except tornado.iostream.StreamClosedError as e:
                 self._err = e
                 if self._error_cb is not None and not self.is_reconnecting and not self.is_closed:
+                    self._logger.exception('problem in read loop')
                     self._error_cb(e)
                 break
 
