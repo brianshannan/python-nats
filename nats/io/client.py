@@ -328,6 +328,7 @@ class Client(object):
             except ErrNoServers:
                 raise
             except Exception as e:
+                self._logger.exception('problem connecting')
                 self._status = Client.DISCONNECTED
                 self._err = e
                 if self._error_cb is not None:
@@ -915,7 +916,10 @@ class Client(object):
         a connection with the server.
         """
         # INFO {...}
+
         line = yield self.io.read_until(_CRLF_, max_bytes=None)
+        if len(line.split(INFO_OP + _SPC_)) < 2:
+            self._logger.error("received invalid line, was '{}'".format(line))
         _, args = line.split(INFO_OP + _SPC_, 1)
         self._server_info = tornado.escape.json_decode((args))
 
@@ -1077,8 +1081,9 @@ class Client(object):
         if self._ping_timer is not None and self._ping_timer.is_running():
             self._ping_timer.stop()
 
+        print self.io, self.io.closed()
         if self.io and not self.io.closed():
-            self.io.close()
+            print self.io.close()
         yield self._end_flusher_loop()
 
         self._err = None
@@ -1093,6 +1098,8 @@ class Client(object):
 
         while True:
             try:
+                if self.io:
+                    self._logger.info("shannan: closed: {}".format(self.io.closed()))
                 # Try to establish a TCP connection to a server in
                 # the cluster then send CONNECT command to it.
                 yield self._select_next_server()
