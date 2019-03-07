@@ -1081,9 +1081,7 @@ class Client(object):
         if self._ping_timer is not None and self._ping_timer.is_running():
             self._ping_timer.stop()
 
-        print self.io, self.io.closed()
         if self.io and not self.io.closed():
-            print self.io.close()
         yield self._end_flusher_loop()
 
         self._err = None
