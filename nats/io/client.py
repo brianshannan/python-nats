@@ -1099,6 +1099,11 @@ class Client(object):
             try:
                 if self.io:
                     self._logger.info("shannan: closed: {}".format(self.io.closed()))
+
+                if self.io and not self.io.closed():
+                    self.io.close()
+                yield self._end_flusher_loop()
+
                 # Try to establish a TCP connection to a server in
                 # the cluster then send CONNECT command to it.
                 yield self._select_next_server()
