@@ -1068,6 +1068,7 @@ class Client(object):
             return
 
         if self.options["allow_reconnect"] and self.is_connected:
+            self._logger.error('shannan: processing op error and starting reconnect "{}"'.format(err))
             self._status = Client.RECONNECTING
             yield self._attempt_reconnect()
         else:
