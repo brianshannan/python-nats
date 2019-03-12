@@ -1098,6 +1098,10 @@ class Client(object):
 
         while True:
             try:
+                if self.is_connected:
+                    self._logger.info('shannan: already connected')
+                    break
+
                 if self.io:
                     self._logger.info("shannan: closed: {}".format(self.io.closed()))
 
